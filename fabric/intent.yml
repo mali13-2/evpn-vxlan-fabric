@@ -1,0 +1,26 @@
+# Source of truth for the data center fabric.
+# Describe WHAT the network should be here; generate.py works out the details
+# (IP addresses, BGP neighbors, cabling) and writes every config file.
+
+fabric:
+  name: dc1
+  image: quay.io/frrouting/frr:10.2.1
+
+  # BGP design (RFC 7938 style): all spines share one AS,
+  # every leaf gets its own AS (leaf N -> leaf_asn_base + N).
+  spine_asn: 65100
+  leaf_asn_base: 65000
+
+  # Address pools
+  loopback_prefix: 10.0.0     # spine N -> 10.0.0.N, leaf N -> 10.0.0.(10+N)
+  p2p_prefix: 10.1            # spine S <-> leaf L link -> 10.1.S.x/31
+
+spines:
+  - spine1
+  - spine2
+
+leaves:
+  - leaf1
+  - leaf2
+  - leaf3
+  - leaf4
