@@ -8,8 +8,8 @@ A leaf-spine data center network built with containerlab and FRRouting, deployed
 - [x] Lab environment (GitHub Codespaces + containerlab)
 - [x] Lab 00: two-router eBGP test
 - [x] eBGP underlay (2 spines, 4 leaves) with ECMP
-- [ ] EVPN-VXLAN overlay and tenant VRFs
-- [ ] Python intent-based config generator
+- [x] EVPN-VXLAN overlay with isolated tenants (ai, web)
+- [x] Python intent-based config generator
 - [ ] Automated tests (pytest)
 - [ ] Failover experiments vs. RSTP
 - [ ] CI pipeline (GitHub Actions)
@@ -26,3 +26,11 @@ sudo containerlab deploy -t fabric/build/dc1.clab.yml
 `fabric/intent.yml` is the single source of truth. `generate.py` turns it into
 every router configuration and the containerlab topology, so the whole network
 can be rebuilt from one file.
+
+## Test it
+```bash
+pytest -v
+```
+The tests read `intent.yml` and check that the live network matches it: BGP
+sessions, ECMP across all spines, EVPN VNIs, same-tenant reachability, and
+cross-tenant isolation.
