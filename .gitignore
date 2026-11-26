@@ -1,0 +1,4 @@
+# containerlab runtime folders
+clab-*/
+.*.clab.yml.bak
+__pycache__/
