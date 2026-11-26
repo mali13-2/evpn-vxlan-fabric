@@ -12,6 +12,31 @@ topology:
       binds:
         - {{ n.name }}/daemons:/etc/frr/daemons
         - {{ n.name }}/frr.conf:/etc/frr/frr.conf
+        - {{ n.name }}/vtysh.conf:/etc/frr/vtysh.conf
+{% if n.vnis %}
+      exec:
+{% for v in n.vnis %}
+        # tenant {{ v.tenant }}: bridge + VXLAN tunnel for VNI {{ v.vni }}
+        - ip link add br{{ v.vni }} type bridge
+        - ip link add vxlan{{ v.vni }} mtu 1500 type vxlan id {{ v.vni }} local {{ n.loopback }} dstport 4789 nolearning
+        - ip link set vxlan{{ v.vni }} master br{{ v.vni }}
+{% for p in v.ports %}
+        - ip link set {{ p }} mtu 1500
+        - ip link set {{ p }} master br{{ v.vni }}
+        - ip link set {{ p }} up
+{% endfor %}
+        - ip link set vxlan{{ v.vni }} up
+        - ip link set br{{ v.vni }} up
+{% endfor %}
+{% endif %}
+{% endfor %}
+{% for h in hosts %}
+    {{ h.name }}:
+      image: {{ fabric.host_image }}
+      exec:
+        - ip link set eth1 mtu 1500
+        - ip addr add {{ h.ip }} dev eth1
+        - ip link set eth1 up
 {% endfor %}
 
   links:

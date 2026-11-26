@@ -1,10 +1,11 @@
 # Source of truth for the data center fabric.
 # Describe WHAT the network should be here; generate.py works out the details
-# (IP addresses, BGP neighbors, cabling) and writes every config file.
+# (IP addresses, BGP neighbors, cabling, VXLAN tunnels) and writes every config file.
 
 fabric:
   name: dc1
   image: quay.io/frrouting/frr:10.2.1
+  host_image: alpine:3.20
 
   # BGP design (RFC 7938 style): all spines share one AS,
   # every leaf gets its own AS (leaf N -> leaf_asn_base + N).
@@ -15,6 +16,10 @@ fabric:
   loopback_prefix: 10.0.0     # spine N -> 10.0.0.N, leaf N -> 10.0.0.(10+N)
   p2p_prefix: 10.1            # spine S <-> leaf L link -> 10.1.S.x/31
 
+  # EVPN route targets are written as <rt_asn>:<vni> on every leaf,
+  # so leaves with different AS numbers still import each other's routes.
+  rt_asn: 65000
+
 spines:
   - spine1
   - spine2
@@ -24,3 +29,18 @@ leaves:
   - leaf2
   - leaf3
   - leaf4
+
+# Tenants: each one is a separate Layer 2 segment stretched across the fabric
+# with its own VXLAN network identifier (VNI). Both tenants deliberately use the
+# SAME subnet, to show that isolation comes from VXLAN, not from IP addressing.
+tenants:
+  - name: ai
+    vni: 10100
+    hosts:
+      - {name: ai1,  leaf: leaf1, ip: 192.168.10.1/24}
+      - {name: ai2,  leaf: leaf4, ip: 192.168.10.2/24}
+  - name: web
+    vni: 10200
+    hosts:
+      - {name: web1, leaf: leaf1, ip: 192.168.10.3/24}
+      - {name: web2, leaf: leaf4, ip: 192.168.10.4/24}

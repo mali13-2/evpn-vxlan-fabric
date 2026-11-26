@@ -21,8 +21,28 @@ router bgp {{ asn }}
  neighbor {{ l.peer_ip }} description {{ l.peer }}
 {% endfor %}
  !
+ ! Underlay: advertise the loopback (also the VXLAN tunnel endpoint on leaves)
  address-family ipv4 unicast
   network {{ loopback }}/32
   maximum-paths 8
+ exit-address-family
+ !
+ ! Overlay: EVPN carries MAC/IP reachability between leaves
+ address-family l2vpn evpn
+{% for l in links %}
+  neighbor {{ l.peer_ip }} activate
+{% if role == "spine" %}
+  neighbor {{ l.peer_ip }} attribute-unchanged next-hop
+{% endif %}
+{% endfor %}
+{% if role == "leaf" %}
+  advertise-all-vni
+{% for v in vnis %}
+  vni {{ v.vni }}
+   route-target import {{ rt_asn }}:{{ v.vni }}
+   route-target export {{ rt_asn }}:{{ v.vni }}
+  exit-vni
+{% endfor %}
+{% endif %}
  exit-address-family
 !

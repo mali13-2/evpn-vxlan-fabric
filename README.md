@@ -7,7 +7,7 @@ A leaf-spine data center network built with containerlab and FRRouting, deployed
 ## Status
 - [x] Lab environment (GitHub Codespaces + containerlab)
 - [x] Lab 00: two-router eBGP test
-- [ ] eBGP underlay (2 spines, 4 leaves) with ECMP
+- [x] eBGP underlay (2 spines, 4 leaves) with ECMP
 - [ ] EVPN-VXLAN overlay and tenant VRFs
 - [ ] Python intent-based config generator
 - [ ] Automated tests (pytest)

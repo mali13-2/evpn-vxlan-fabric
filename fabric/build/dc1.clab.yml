@@ -11,26 +11,94 @@ topology:
       binds:
         - spine1/daemons:/etc/frr/daemons
         - spine1/frr.conf:/etc/frr/frr.conf
+        - spine1/vtysh.conf:/etc/frr/vtysh.conf
     spine2:
       binds:
         - spine2/daemons:/etc/frr/daemons
         - spine2/frr.conf:/etc/frr/frr.conf
+        - spine2/vtysh.conf:/etc/frr/vtysh.conf
     leaf1:
       binds:
         - leaf1/daemons:/etc/frr/daemons
         - leaf1/frr.conf:/etc/frr/frr.conf
+        - leaf1/vtysh.conf:/etc/frr/vtysh.conf
+      exec:
+        # tenant ai: bridge + VXLAN tunnel for VNI 10100
+        - ip link add br10100 type bridge
+        - ip link add vxlan10100 mtu 1500 type vxlan id 10100 local 10.0.0.11 dstport 4789 nolearning
+        - ip link set vxlan10100 master br10100
+        - ip link set eth3 mtu 1500
+        - ip link set eth3 master br10100
+        - ip link set eth3 up
+        - ip link set vxlan10100 up
+        - ip link set br10100 up
+        # tenant web: bridge + VXLAN tunnel for VNI 10200
+        - ip link add br10200 type bridge
+        - ip link add vxlan10200 mtu 1500 type vxlan id 10200 local 10.0.0.11 dstport 4789 nolearning
+        - ip link set vxlan10200 master br10200
+        - ip link set eth4 mtu 1500
+        - ip link set eth4 master br10200
+        - ip link set eth4 up
+        - ip link set vxlan10200 up
+        - ip link set br10200 up
     leaf2:
       binds:
         - leaf2/daemons:/etc/frr/daemons
         - leaf2/frr.conf:/etc/frr/frr.conf
+        - leaf2/vtysh.conf:/etc/frr/vtysh.conf
     leaf3:
       binds:
         - leaf3/daemons:/etc/frr/daemons
         - leaf3/frr.conf:/etc/frr/frr.conf
+        - leaf3/vtysh.conf:/etc/frr/vtysh.conf
     leaf4:
       binds:
         - leaf4/daemons:/etc/frr/daemons
         - leaf4/frr.conf:/etc/frr/frr.conf
+        - leaf4/vtysh.conf:/etc/frr/vtysh.conf
+      exec:
+        # tenant ai: bridge + VXLAN tunnel for VNI 10100
+        - ip link add br10100 type bridge
+        - ip link add vxlan10100 mtu 1500 type vxlan id 10100 local 10.0.0.14 dstport 4789 nolearning
+        - ip link set vxlan10100 master br10100
+        - ip link set eth3 mtu 1500
+        - ip link set eth3 master br10100
+        - ip link set eth3 up
+        - ip link set vxlan10100 up
+        - ip link set br10100 up
+        # tenant web: bridge + VXLAN tunnel for VNI 10200
+        - ip link add br10200 type bridge
+        - ip link add vxlan10200 mtu 1500 type vxlan id 10200 local 10.0.0.14 dstport 4789 nolearning
+        - ip link set vxlan10200 master br10200
+        - ip link set eth4 mtu 1500
+        - ip link set eth4 master br10200
+        - ip link set eth4 up
+        - ip link set vxlan10200 up
+        - ip link set br10200 up
+    ai1:
+      image: alpine:3.20
+      exec:
+        - ip link set eth1 mtu 1500
+        - ip addr add 192.168.10.1/24 dev eth1
+        - ip link set eth1 up
+    ai2:
+      image: alpine:3.20
+      exec:
+        - ip link set eth1 mtu 1500
+        - ip addr add 192.168.10.2/24 dev eth1
+        - ip link set eth1 up
+    web1:
+      image: alpine:3.20
+      exec:
+        - ip link set eth1 mtu 1500
+        - ip addr add 192.168.10.3/24 dev eth1
+        - ip link set eth1 up
+    web2:
+      image: alpine:3.20
+      exec:
+        - ip link set eth1 mtu 1500
+        - ip addr add 192.168.10.4/24 dev eth1
+        - ip link set eth1 up
 
   links:
     - endpoints: ["spine1:eth1", "leaf1:eth1"]
@@ -41,3 +109,7 @@ topology:
     - endpoints: ["spine2:eth2", "leaf2:eth2"]
     - endpoints: ["spine2:eth3", "leaf3:eth2"]
     - endpoints: ["spine2:eth4", "leaf4:eth2"]
+    - endpoints: ["leaf1:eth3", "ai1:eth1"]
+    - endpoints: ["leaf4:eth3", "ai2:eth1"]
+    - endpoints: ["leaf1:eth4", "web1:eth1"]
+    - endpoints: ["leaf4:eth4", "web2:eth1"]
