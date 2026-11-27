@@ -76,25 +76,25 @@ topology:
         - ip link set vxlan10200 up
         - ip link set br10200 up
     ai1:
-      image: alpine:3.20
+      image: ghcr.io/hellt/network-multitool
       exec:
         - ip link set eth1 mtu 1500
         - ip addr add 192.168.10.1/24 dev eth1
         - ip link set eth1 up
     ai2:
-      image: alpine:3.20
+      image: ghcr.io/hellt/network-multitool
       exec:
         - ip link set eth1 mtu 1500
         - ip addr add 192.168.10.2/24 dev eth1
         - ip link set eth1 up
     web1:
-      image: alpine:3.20
+      image: ghcr.io/hellt/network-multitool
       exec:
         - ip link set eth1 mtu 1500
         - ip addr add 192.168.10.3/24 dev eth1
         - ip link set eth1 up
     web2:
-      image: alpine:3.20
+      image: ghcr.io/hellt/network-multitool
       exec:
         - ip link set eth1 mtu 1500
         - ip addr add 192.168.10.4/24 dev eth1

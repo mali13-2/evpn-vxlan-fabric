@@ -12,6 +12,15 @@ interface {{ l.ifname }}
  ip address {{ l.ip }}/31
 !
 {% endfor %}
+bfd
+ profile fast
+  transmit-interval {{ bfd.interval_ms }}
+  receive-interval {{ bfd.interval_ms }}
+  detect-multiplier {{ bfd.multiplier }}
+ exit
+ !
+exit
+!
 router bgp {{ asn }}
  bgp router-id {{ loopback }}
  no bgp ebgp-requires-policy
@@ -19,6 +28,9 @@ router bgp {{ asn }}
 {% for l in links %}
  neighbor {{ l.peer_ip }} remote-as {{ l.peer_asn }}
  neighbor {{ l.peer_ip }} description {{ l.peer }}
+{% if bfd.enabled %}
+ neighbor {{ l.peer_ip }} bfd profile fast
+{% endif %}
 {% endfor %}
  !
  ! Underlay: advertise the loopback (also the VXLAN tunnel endpoint on leaves)

@@ -5,7 +5,7 @@
 fabric:
   name: dc1
   image: quay.io/frrouting/frr:10.2.1
-  host_image: alpine:3.20
+  host_image: ghcr.io/hellt/network-multitool   # has iputils ping, iperf3, tcpdump
 
   # BGP design (RFC 7938 style): all spines share one AS,
   # every leaf gets its own AS (leaf N -> leaf_asn_base + N).
@@ -19,6 +19,13 @@ fabric:
   # EVPN route targets are written as <rt_asn>:<vni> on every leaf,
   # so leaves with different AS numbers still import each other's routes.
   rt_asn: 65000
+
+  # BFD detects a dead neighbor in interval_ms x multiplier (100 x 3 = 300 ms)
+  # instead of waiting for the BGP hold timer (9 s with datacenter defaults).
+  bfd:
+    enabled: true
+    interval_ms: 100
+    multiplier: 3
 
 spines:
   - spine1

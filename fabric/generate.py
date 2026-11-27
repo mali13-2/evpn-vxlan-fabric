@@ -54,11 +54,11 @@ def build_model(intent):
     for s, name in enumerate(intent["spines"], start=1):
         nodes[name] = {"name": name, "role": "spine", "asn": f["spine_asn"],
                        "loopback": f"{f['loopback_prefix']}.{s}",
-                       "links": [], "vnis": [], "rt_asn": f["rt_asn"]}
+                       "links": [], "vnis": [], "rt_asn": f["rt_asn"], "bfd": f["bfd"]}
     for l, name in enumerate(intent["leaves"], start=1):
         nodes[name] = {"name": name, "role": "leaf", "asn": f["leaf_asn_base"] + l,
                        "loopback": f"{f['loopback_prefix']}.{10 + l}",
-                       "links": [], "vnis": [], "rt_asn": f["rt_asn"],
+                       "links": [], "vnis": [], "rt_asn": f["rt_asn"], "bfd": f["bfd"],
                        "next_port": len(intent["spines"]) + 1}
 
     # Underlay: every leaf connects to every spine.

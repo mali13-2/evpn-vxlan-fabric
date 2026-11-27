@@ -113,3 +113,15 @@ def test_different_tenants_are_isolated(a, b):
     """Zero-trust segmentation: tenants must never reach each other."""
     assert not ping(a["name"], b["ip"].split("/")[0]), \
         f"ISOLATION BREACH: {a['name']} ({a['tenant']}) reached {b['name']} ({b['tenant']})"
+
+
+# ---------- fast failure detection ----------
+
+@pytest.mark.skipif(not INTENT["fabric"].get("bfd", {}).get("enabled"), reason="BFD disabled in intent")
+@pytest.mark.parametrize("node", SPINES + LEAVES)
+def test_bfd_sessions_up(node):
+    """BFD runs on every BGP session so failures are detected in milliseconds."""
+    peers = vtysh_json(node, "show bfd peers")
+    up = [p for p in peers if p.get("status") == "up"]
+    expected = len(LEAVES) if node in SPINES else len(SPINES)
+    assert len(up) == expected, f"{node}: {len(up)}/{expected} BFD sessions up"
